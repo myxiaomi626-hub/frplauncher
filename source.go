@@ -10,21 +10,22 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"strings"
 	"time"
 )
 
 const (
-	frpVersion = "0.68.0"
-	frpDir     = "frp_data"
+	launcherVersion = "1.0.1"
+	frpVersion      = "0.68.0"
+	frpDir          = "frp_data"
+	githubRepo      = "myxiaomi626-hub/frplauncher"
 )
 
 func printBanner() {
 	fmt.Println()
 	fmt.Println("  ╔══════════════════════════════════╗")
-	fmt.Println("  ║       FRP Лаунчер v" + frpVersion + "        ║")
+	fmt.Println("  ║       FRP Лаунчер v" + launcherVersion + "          ║")
 	fmt.Println("  ╚══════════════════════════════════╝")
 	fmt.Println()
 }
@@ -189,34 +190,39 @@ func getServerFlag(ip string) string {
 	ip = strings.TrimSpace(ip)
 	switch ip {
 	case "194.31.223.177":
-		return " 🇩🇪"
+		return " [DE]"
 	case "45.131.46.14":
-		return " 🇷🇺"
+		return " [RU]"
 	}
 	return ""
 }
 
-func getExternalIP() string {
-	type ipInfo struct {
-		IP string `json:"ip"`
+func checkUpdate() {
+	type release struct {
+		TagName string `json:"tag_name"`
 	}
 	client := &http.Client{Timeout: 5 * time.Second}
-	resp, err := client.Get("https://ipinfo.io/json")
+	url := fmt.Sprintf("https://api.github.com/repos/%s/releases/latest", githubRepo)
+	resp, err := client.Get(url)
 	if err != nil {
-		return ""
+		return
 	}
 	defer resp.Body.Close()
-	var info ipInfo
-	if err := json.NewDecoder(resp.Body).Decode(&info); err != nil {
-		return ""
+	var rel release
+	if err := json.NewDecoder(resp.Body).Decode(&rel); err != nil {
+		return
 	}
-	return info.IP
+	latest := strings.TrimPrefix(rel.TagName, "v")
+	if latest != "" && latest != launcherVersion {
+		fmt.Printf("  [!] Доступна новая версия: v%s (у вас v%s)\n", latest, launcherVersion)
+		fmt.Printf("  [!] https://github.com/%s/releases/latest\n\n", githubRepo)
+	}
 }
 
-var ipPortRegex = regexp.MustCompile(`(\d+\.\d+\.\d+\.\d+):(\d+)`)
 
 func main() {
 	printBanner()
+	checkUpdate()
 
 	binaryPath := filepath.Join(frpDir, getFRPBinaryName())
 	if _, err := os.Stat(binaryPath); os.IsNotExist(err) {
