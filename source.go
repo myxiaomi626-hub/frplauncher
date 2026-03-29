@@ -193,6 +193,10 @@ func getServerFlag(ip string) string {
 		return " [DE]"
 	case "45.131.46.14":
 		return " [RU]"
+	case "195.226.92.129":
+		return " [FI]"
+	case "185.182.65.150":
+		return " [RU-2]"
 	}
 	return ""
 }
