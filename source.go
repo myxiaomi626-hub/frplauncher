@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	launcherVersion = "1.0.2"
+	launcherVersion = "1.0.1"
 	frpVersion      = "0.68.0"
 	frpDir          = "frp_data"
 	githubRepo      = "myxiaomi626-hub/frplauncher"
